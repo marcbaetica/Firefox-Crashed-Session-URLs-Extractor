@@ -2,8 +2,12 @@
 #instructions: add file in the same folder location as script and run it
 #processes a list of tab urls for the windows that were not closed and another list of tab urls for windows that were marked as closed (some are common due to the data corruption causing the session to not recover)
 #outputs:
-# - the tab number for each window as it is processed
-# - a list representing comunality and mutual exclusivity between the two lists 
+# - the tab number for each window as it is processed (logged for debugging purposes)
+# - a sets of (therefore unique) items representing the tabs that were open at the time of forced browser shutdown
+# - a sets of (therefore unique) items representing the tabs that were closed at the time of forced browser shutdown (there is overlap between the set above and this one due to the data coruption)
+# - a list of duplicate items found among open tabs
+# - a list of duplicate items found among closed tabs
+# - finally, and most importantly, an alphabetically sorted list of all tabs representing the union between the two sets. All items in this list are unique
 
 import json
 
@@ -62,6 +66,9 @@ def getTabsFromClosedWindow(window):
 jsonContent = loadFile("recovery.jsonlz4_converted.json");
 windows, closedWindows = extractWindows(jsonContent);
 
+#getTabsFromWindow(windows[8]); #for window 9
+#getTabsFromClosedWindow(closedWindows[4]); #for window 5
+
 for i in range(10):
 	print(f'WINDOW {i+1}');
 	getTabsFromWindow(windows[i]);
@@ -70,15 +77,27 @@ for i in range(9):
 	print(f'WINDOW {i+1}');
 	getTabsFromClosedWindow(closedWindows[i]);
 
-#getTabsFromWindow(windows[8]); #for window 9
-#getTabsFromClosedWindow(closedWindows[4]); #for window 5
+allTabsSet = openTabs.union(closedTabs)
+allTabsList = list(allTabsSet) #need conversion to list as sets are not sortable
+allTabsList.sort()
 
-diffTabs = openTabs.difference(closedTabs);
-print(f'DIFF TABLS: {diffTabs}');
 
-print();
 
-print(f'Duplicate Open Tabs: {duplicateOpenTabs}');
-print(f'Duplicate Closed Tabs: {duplicateClosedTabs}');
+
+#Printing parsed and processed data:
+
+#diffTabs = openTabs.difference(closedTabs);
+#print(f'\nDIFF TABLS: {diffTabs}');
+
+print(f'\nTabs maked as Open (no repetition): {openTabs}')
+print(f'Tabs marked as Closed (no repetition): {closedTabs}')
+
+print(f'\nDuplicate items in Open windows: {duplicateOpenTabs}');
+print(f'Duplicate items in Closed windows: {duplicateClosedTabs}');
 #getTabsFromWindow(windows[5]); #print(len(window['tabs'])); #715 for window 5 but craps out at 140
 
+
+print('\nFull list of tabs:')
+for val in allTabsList:
+	if "newtab" not in val:
+		print(val)

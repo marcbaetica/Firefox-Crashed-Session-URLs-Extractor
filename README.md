@@ -10,7 +10,9 @@ Add file in the same folder location as script and run it
 The script processes a list of tab urls for the windows that were not closed and another list of tab urls for windows that were marked as closed (some are common due to the data corruption causing the session to not recover)
 
 The output will result in
-- the tab number for each window as it is processed in real time
-- a list representing duplicates and diferences between the two lists*
-
-*NOTE: if the duplicate list is empty, this represents a mutual exclusivity relationship between the two lists
+- the tab number for each window as it is processed (logged for debugging purposes)
+- a sets of (therefore unique) items representing the tabs that were open at the time of forced browser shutdown
+- a sets of (therefore unique) items representing the tabs that were closed at the time of forced browser shutdown (there is overlap between the set above and this one due to the data corruption)
+- a list of duplicate items found among open tabs
+- a list of duplicate items found among closed tabs
+- finally, and most importantly, an alphabetically sorted list of all tabs representing the union between the two sets. All items in this list are unique
